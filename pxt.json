@@ -1,6 +1,6 @@
 {
-    "name": "Rymd-Skyttaren",
-    "description": "Ett enkelt rymdskjutspel för MakeCode Arcade. Skjut asteroider och överlev så länge som möjligt!",
+    "name": "Rädda Havet",
+    "description": "Ett hållbarhetsspel för MakeCode Arcade. Städa upp plastskräp i havet och rädda fiskarna!",
     "dependencies": {
         "device": "*"
     },

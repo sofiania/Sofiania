@@ -1,27 +1,77 @@
 // ==============================================
-// RYMD-SKYTTAREN
-// Ett enkelt rymdskjutspel för MakeCode Arcade
+// RÄDDA HAVET
+// Ett hållbarhetsspel för MakeCode Arcade
 //
 // Kontroller:
-//   Piltangenter / Joystick  → Flytta rymdskeppet
-//   A-knapp                  → Skjut laser
+//   Piltangenter / Joystick  → Styr båten
+//   A-knapp                  → Kasta nät
 //
-// Mål: Skjut asteroider och samla poäng!
-//      Tre träffar och spelet är slut.
+// Mål: Fånga plastskräp med nätet och rensa havet!
+//      Undvik oljeflackar – tre träffar och spelet är slut.
+//
+// Fakta: Över 8 miljoner ton plast hamnar i
+//        världens hav varje år.
 // ==============================================
 
 // ---------- Sprite-pixelbilder ----------
 
-// Rymdskepp (spelaren) – blå/vit raket
-const shipImage = img`
+// Båt (spelaren)
+const båtBild = img`
     . . . . . . . . . . . . . . . .
-    . . . . . . . 1 . . . . . . . .
-    . . . . . . 1 1 1 . . . . . . .
-    . . . . . 1 9 1 9 1 . . . . . .
-    . . . . 1 9 9 1 9 9 1 . . . . .
-    . . . . . 1 1 1 1 1 . . . . . .
-    . . . . 1 1 . . . 1 1 . . . . .
-    . . . 1 . . . . . . . 1 . . . .
+    . . . . . . 8 . . . . . . . . .
+    . . . . . . 8 . . . . . . . . .
+    . . . . . 8 8 8 . . . . . . . .
+    . . . . 8 1 1 1 8 . . . . . . .
+    . . 6 6 6 1 1 1 6 6 6 . . . . .
+    . 6 6 6 6 6 6 6 6 6 6 6 . . . .
+    . . 9 9 . . 9 9 . . 9 9 . . . .
+    . . . . . . . . . . . . . . . .
+    . . . . . . . . . . . . . . . .
+    . . . . . . . . . . . . . . . .
+    . . . . . . . . . . . . . . . .
+    . . . . . . . . . . . . . . . .
+    . . . . . . . . . . . . . . . .
+    . . . . . . . . . . . . . . . .
+    . . . . . . . . . . . . . . . .
+`
+
+// Nät (projektil)
+const nätBild = img`
+    1 . 1
+    . 1 .
+    1 . 1
+`
+
+// Plastflaska
+const flaskaBild = img`
+    . . . . . . . . . . . . . . . .
+    . . . . . 8 8 . . . . . . . . .
+    . . . . 8 1 1 8 . . . . . . . .
+    . . . . . 8 8 . . . . . . . . .
+    . . . . 8 1 1 8 . . . . . . . .
+    . . . 8 1 1 1 1 8 . . . . . . .
+    . . . 8 1 1 1 1 8 . . . . . . .
+    . . . 8 1 1 1 1 8 . . . . . . .
+    . . . 8 1 1 1 1 8 . . . . . . .
+    . . . . 8 8 8 8 . . . . . . . .
+    . . . . . . . . . . . . . . . .
+    . . . . . . . . . . . . . . . .
+    . . . . . . . . . . . . . . . .
+    . . . . . . . . . . . . . . . .
+    . . . . . . . . . . . . . . . .
+    . . . . . . . . . . . . . . . .
+`
+
+// Plastpåse
+const påseBild = img`
+    . . . . . . . . . . . . . . . .
+    . . . . . 1 1 1 . . . . . . . .
+    . . . . 1 . . . 1 . . . . . . .
+    . . . 1 . 1 . 1 . 1 . . . . . .
+    . . . 1 1 . 1 . 1 1 . . . . . .
+    . . . . 1 1 1 1 1 . . . . . . .
+    . . . . . 1 1 1 . . . . . . . .
+    . . . . . . 1 . . . . . . . . .
     . . . . . . . . . . . . . . . .
     . . . . . . . . . . . . . . . .
     . . . . . . . . . . . . . . . .
@@ -32,26 +82,19 @@ const shipImage = img`
     . . . . . . . . . . . . . . . .
 `
 
-// Laser (skott) – gul/vit prick
-const laserImage = img`
-    . 5 .
-    5 1 5
-    . 5 .
-`
-
-// Asteroid – grå/brun klump
-const asteroidImage = img`
+// Oljeflack (fiende/fara)
+const oljeBild = img`
     . . . . . . . . . . . . . . . .
-    . . . . 6 6 6 6 6 . . . . . . .
-    . . . 6 7 7 7 7 7 6 . . . . . .
-    . . 6 7 7 6 7 7 6 7 6 . . . . .
-    . . 6 7 6 7 7 7 6 7 6 . . . . .
-    . 6 7 7 7 7 6 7 7 7 7 6 . . . .
-    . 6 7 6 7 7 7 7 6 7 7 6 . . . .
-    . 6 7 7 7 6 7 7 7 7 6 6 . . . .
-    . . 6 7 7 7 7 6 7 7 6 . . . . .
-    . . . 6 7 6 7 7 7 6 . . . . . .
-    . . . . 6 6 6 6 6 . . . . . . .
+    . . . . . . . . . . . . . . . .
+    . . . . 12 12 12 12 . . . . . .
+    . . . 12 2 2 2 2 12 12 . . . .
+    . . 12 2 2 15 2 2 2 12 . . . .
+    . . 12 2 15 2 2 15 2 12 . . . .
+    . . . 12 2 2 2 2 12 . . . . . .
+    . . . . 12 12 12 12 . . . . . .
+    . . . . . . . . . . . . . . . .
+    . . . . . . . . . . . . . . . .
+    . . . . . . . . . . . . . . . .
     . . . . . . . . . . . . . . . .
     . . . . . . . . . . . . . . . .
     . . . . . . . . . . . . . . . .
@@ -59,18 +102,18 @@ const asteroidImage = img`
     . . . . . . . . . . . . . . . .
 `
 
-// Explosion – orange/röd
-const explosionImage = img`
+// Glad fisk (bonus)
+const fiskBild = img`
     . . . . . . . . . . . . . . . .
-    . . . . . 2 . . 2 . . . . . . .
-    . . . . 2 4 2 2 4 2 . . . . . .
-    . . . 2 4 5 4 4 5 4 2 . . . . .
-    . . . . 2 4 5 5 4 2 . . . . . .
-    . . 2 2 4 5 5 5 5 4 2 2 . . . .
-    . . . . 2 4 5 5 4 2 . . . . . .
-    . . . 2 4 5 4 4 5 4 2 . . . . .
-    . . . . 2 4 2 2 4 2 . . . . . .
-    . . . . . 2 . . 2 . . . . . . .
+    . . . . . . . . . . . . . . . .
+    . . . . 9 9 . . . . . . . . . .
+    . . . 9 9 9 9 9 9 . . . . . . .
+    . . 9 9 9 1 9 9 9 9 9 . . . . .
+    . . 9 9 9 9 9 9 9 9 9 . . . . .
+    . . . 9 9 9 9 9 9 . . . . . . .
+    . . . . 9 9 . . . . . . . . . .
+    . . . . . . . . . . . . . . . .
+    . . . . . . . . . . . . . . . .
     . . . . . . . . . . . . . . . .
     . . . . . . . . . . . . . . . .
     . . . . . . . . . . . . . . . .
@@ -83,148 +126,223 @@ const explosionImage = img`
 const SpriteKind = {
     Player: 0,
     Projectile: 1,
-    Enemy: 2,
-    Explosion: 3
+    Skräp: 2,      // plastskräp att samla
+    Fara: 3,       // oljeflackar att undvika
+    Bonus: 4       // fiskar ger extra poäng
 }
 
 // ---------- Globala variabler ----------
-let spelare: Sprite
-let asteroidHastighet = 40        // px/s, ökar med tid
-let senasteAsteroid = 0           // ms sedan senaste asteroid
-let asteroidInterval = 1800       // ms mellan asteroider (minskar med tid)
-let kanSkjuta = true              // debounce för skjutning
+let båt: Sprite
+let skräpHastighet = 35
+let senasteSkräp = 0
+let skräpInterval = 1600
+let senasteFisk = 0
+let fiskInterval = 6000
+let kanKastaÄt = true
 let spelStartat = false
+let poängMål = 100    // mål för att "rädda havet"
 
-// ---------- Bakgrund ----------
+// ---------- Vattenbakgrund ----------
 function skapaBakgrund() {
-    scene.setBackgroundColor(0)   // svart rymdbakgrund
+    // Djupblå havsbakgrund
+    scene.setBackgroundColor(9)
 
-    // Slumpmässiga stjärnor
-    for (let i = 0; i < 60; i++) {
-        const x = Math.randomRange(0, scene.screenWidth())
-        const y = Math.randomRange(0, scene.screenHeight())
-        const storlek = Math.randomRange(1, 3)
-        const färg = storlek === 3 ? 1 : (storlek === 2 ? 5 : 15)
-        scene.backgroundImage().setPixel(x, y, färg)
+    const bg = scene.backgroundImage()
+    const w = scene.screenWidth()
+    const h = scene.screenHeight()
+
+    // Vågor och vatteneffekt
+    for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+            // Djupare vatten längre ner
+            if (y > h * 0.7 && Math.percentChance(3)) {
+                bg.setPixel(x, y, 8)   // mörkare blå
+            } else if (Math.percentChance(1)) {
+                bg.setPixel(x, y, 1)   // ljusa reflektioner
+            }
+        }
+    }
+
+    // Våglinjer
+    for (let i = 0; i < 5; i++) {
+        const y = Math.randomRange(5, h - 10)
+        for (let x = 0; x < w - 4; x += 6) {
+            bg.setPixel(x, y, 6)
+            bg.setPixel(x + 1, y - 1, 6)
+            bg.setPixel(x + 2, y, 6)
+            bg.setPixel(x + 3, y + 1, 6)
+        }
+    }
+
+    // Sol i övre hörnet
+    for (let dx = -4; dx <= 4; dx++) {
+        for (let dy = -4; dy <= 4; dy++) {
+            if (dx * dx + dy * dy <= 16) {
+                bg.setPixel(10 + dx, 10 + dy, 5)   // gul sol
+            }
+        }
     }
 }
 
 // ---------- Skapa spelaren ----------
-function skapaSpelare() {
-    spelare = sprites.create(shipImage, SpriteKind.Player)
-    spelare.setPosition(scene.screenWidth() / 2, scene.screenHeight() - 20)
-    spelare.setStayInScreen(true)
-    controller.moveSprite(spelare, 100, 100)
+function skapaBåt() {
+    båt = sprites.create(båtBild, SpriteKind.Player)
+    båt.setPosition(scene.screenWidth() / 2, scene.screenHeight() - 15)
+    båt.setStayInScreen(true)
+    controller.moveSprite(båt, 110, 0)   // bara horisontell rörelse
+    båt.vy = 0
 }
 
-// ---------- Skjut laser ----------
-function skjutLaser() {
-    if (!kanSkjuta) return
-    kanSkjuta = false
+// ---------- Kasta nät ----------
+function kastaNät() {
+    if (!kanKastaÄt) return
+    kanKastaÄt = false
 
-    const laser = sprites.createProjectileFromSprite(laserImage, spelare, 0, -180)
-    laser.setKind(SpriteKind.Projectile)
-    music.playTone(880, 50)
+    const nät = sprites.createProjectileFromSprite(nätBild, båt, 0, -160)
+    nät.setKind(SpriteKind.Projectile)
+    music.playTone(523, 80)
 
-    pause(200)
-    kanSkjuta = true
+    pause(250)
+    kanKastaÄt = true
 }
 
-// ---------- Skapa asteroid ----------
-function skapaAsteroid() {
-    const asteroid = sprites.create(asteroidImage, SpriteKind.Enemy)
+// ---------- Skapa plastskräp ----------
+function skapaSkräp() {
+    // Slumpa mellan flaska och påse
+    const bildVal = Math.percentChance(50) ? flaskaBild : påseBild
+    const skräp = sprites.create(bildVal, SpriteKind.Skräp)
     const x = Math.randomRange(8, scene.screenWidth() - 8)
-    asteroid.setPosition(x, -8)
-
-    // Lite slumpmässig vinkel
-    const vinkeln = Math.randomRange(-25, 25)
-    const vx = Math.sin(vinkeln * Math.PI / 180) * asteroidHastighet
-    asteroid.setVelocity(vx, asteroidHastighet)
-    asteroid.setFlag(SpriteFlag.AutoDestroy, true)
+    skräp.setPosition(x, -8)
+    skräp.vy = skräpHastighet
+    skräp.vx = Math.randomRange(-15, 15)
+    skräp.setFlag(SpriteFlag.AutoDestroy, true)
 }
 
-// ---------- Explosion-effekt ----------
-function visaExplosion(x: number, y: number) {
-    const exp = sprites.create(explosionImage, SpriteKind.Explosion)
-    exp.setPosition(x, y)
-    exp.setFlag(SpriteFlag.Ghost, true)
-    music.playTone(220, 100)
-    pause(200)
-    exp.destroy()
+// ---------- Skapa oljeflack ----------
+function skapaOljeflack() {
+    const olja = sprites.create(oljeBild, SpriteKind.Fara)
+    const x = Math.randomRange(8, scene.screenWidth() - 8)
+    olja.setPosition(x, -8)
+    olja.vy = skräpHastighet * 0.7
+    olja.setFlag(SpriteFlag.AutoDestroy, true)
 }
 
-// ---------- Kollisioner: Laser träffar asteroid ----------
-sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (laser, asteroid) {
-    const px = asteroid.x
-    const py = asteroid.y
-    laser.destroy()
-    asteroid.destroy()
+// ---------- Skapa fisk (bonus) ----------
+function skapaFisk() {
+    const fisk = sprites.create(fiskBild, SpriteKind.Bonus)
+    // Fiskar simmar in från sidan
+    const frånVänster = Math.percentChance(50)
+    fisk.setPosition(frånVänster ? -8 : scene.screenWidth() + 8, Math.randomRange(20, scene.screenHeight() - 20))
+    fisk.vx = frånVänster ? 40 : -40
+    fisk.setFlag(SpriteFlag.AutoDestroy, true)
+}
+
+// ---------- Nät fångar plastskräp ----------
+sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Skräp, function (nät, skräp) {
+    nät.destroy()
+    skräp.destroy()
     info.changeScoreBy(10)
-    visaExplosion(px, py)
+    music.playTone(659, 100)
+
+    // Kontrollera om spelaren nått målet
+    if (info.score() >= poängMål) {
+        game.over(true)
+    }
 })
 
-// ---------- Kollisioner: Spelare träffar asteroid ----------
-sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy, function (ship, asteroid) {
-    const px = asteroid.x
-    const py = asteroid.y
-    asteroid.destroy()
+// ---------- Båt plockar upp skräp (direkt) ----------
+sprites.onOverlap(SpriteKind.Player, SpriteKind.Skräp, function (båtSprite, skräp) {
+    skräp.destroy()
+    info.changeScoreBy(5)
+    music.playTone(523, 80)
+
+    if (info.score() >= poängMål) {
+        game.over(true)
+    }
+})
+
+// ---------- Båt träffar oljeflack ----------
+sprites.onOverlap(SpriteKind.Player, SpriteKind.Fara, function (båtSprite, olja) {
+    olja.destroy()
     info.changeLifeBy(-1)
-    scene.cameraShake(4, 300)
-    visaExplosion(px, py)
+    scene.cameraShake(3, 300)
+    music.playTone(196, 200)
 
     if (info.life() <= 0) {
         game.over(false)
     }
 })
 
+// ---------- Nät träffar oljeflack ----------
+sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Fara, function (nät, olja) {
+    // Nätet kan inte fånga olja – låt oljan fortsätta
+    nät.destroy()
+    music.playTone(349, 80)
+})
+
+// ---------- Båt möter fisk (bonus!) ----------
+sprites.onOverlap(SpriteKind.Player, SpriteKind.Bonus, function (båtSprite, fisk) {
+    fisk.destroy()
+    info.changeScoreBy(20)
+    music.playTone(784, 150)
+    game.showLongText("Glad fisk! +20p\nRent hav = fler fiskar!", DialogLayout.Center)
+})
+
 // ---------- Kontroller ----------
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (spielStartat) skjutLaser()
+    if (spelStartat) kastaNät()
 })
 
 controller.A.onEvent(ControllerButtonEvent.Repeated, function () {
-    if (spielStartat) skjutLaser()
+    if (spelStartat) kastaNät()
 })
 
-// ---------- Spelloop – svårighetsgrad ökar med tid ----------
+// ---------- Spelloop ----------
 game.onUpdateInterval(500, function () {
-    if (!spielStartat) return
+    if (!spelStartat) return
 
     const tid = game.runtime()
 
-    // Snabbare asteroider ju längre man spelar
-    asteroidHastighet = 40 + Math.floor(tid / 5000) * 5
+    // Svårighetsgrad ökar med tid
+    skräpHastighet = 35 + Math.floor(tid / 8000) * 4
+    skräpInterval = Math.max(600, 1600 - Math.floor(tid / 10000) * 150)
 
-    // Tätare asteroider med tid (minimum 600ms)
-    asteroidInterval = Math.max(600, 1800 - Math.floor(tid / 8000) * 150)
+    // Skapa skräp
+    if (tid - senasteSkräp > skräpInterval) {
+        skapaSkräp()
+        senasteSkräp = tid
 
-    // Skapa nya asteroider
-    if (tid - senasteAsteroid > asteroidInterval) {
-        skapaAsteroid()
-        senasteAsteroid = tid
-
-        // Chans att skapa dubbel-asteroid på svåra nivåer
-        if (tid > 20000 && Math.percentChance(30)) {
-            pause(100)
-            skapaAsteroid()
+        // Oljeflack var 3:e skräpvåg
+        if (Math.percentChance(35)) {
+            skapaOljeflack()
         }
     }
-})
 
-// ---------- Startskärm ----------
-function visaStartskärm() {
-    game.splash("RYMD-SKYTTAREN", "Tryck A för att börja!")
-    spielStartat = true
-    senasteAsteroid = game.runtime()
-}
+    // Skapa bonus-fisk ibland
+    if (tid - senasteFisk > fiskInterval) {
+        if (Math.percentChance(60)) {
+            skapaFisk()
+        }
+        senasteFisk = tid
+    }
+})
 
 // ---------- Starta spelet ----------
 function startaSpelet() {
     info.setScore(0)
     info.setLife(3)
     skapaBakgrund()
-    skapaSpelare()
-    visaStartskärm()
+    skapaBåt()
+
+    // Startmeddelande
+    game.showLongText(
+        "RÄDDA HAVET!\n\nFånga plastskräp med nätet (A).\nUndvik svarta oljeflackar.\nSamla " + poängMål + " poäng för att rädda havet!\n\nÖver 8 miljoner ton plast\nhamnar i haven varje år.",
+        DialogLayout.Center
+    )
+
+    spelStartat = true
+    senasteSkräp = game.runtime()
+    senasteFisk = game.runtime()
 }
 
 startaSpelet()
