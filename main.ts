@@ -123,12 +123,10 @@ const fiskBild = img`
 `
 
 // ---------- Sprite-typer ----------
-const SpriteKind = {
-    Player: 0,
-    Projectile: 1,
-    Skräp: 2,      // plastskräp att samla
-    Fara: 3,       // oljeflackar att undvika
-    Bonus: 4       // fiskar ger extra poäng
+namespace SpriteKind {
+    export const Skräp = SpriteKind.create()   // plastskräp att samla
+    export const Fara = SpriteKind.create()    // oljeflackar att undvika
+    export const Bonus = SpriteKind.create()   // fiskar ger extra poäng
 }
 
 // ---------- Globala variabler ----------
