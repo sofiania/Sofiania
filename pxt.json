@@ -1,0 +1,19 @@
+{
+    "name": "Rymd-Skyttaren",
+    "description": "Ett enkelt rymdskjutspel för MakeCode Arcade. Skjut asteroider och överlev så länge som möjligt!",
+    "dependencies": {
+        "device": "*"
+    },
+    "files": [
+        "main.ts",
+        "main.blocks"
+    ],
+    "targetVersions": {
+        "branch": "v1.8.45",
+        "tag": "v1.8.45",
+        "commits": "https://github.com/microsoft/pxt-arcade/commits/v1.8.45",
+        "target": "1.8.45",
+        "pxt": "7.4.27"
+    },
+    "preferredEditor": "tsprj"
+}
